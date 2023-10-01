@@ -1,0 +1,120 @@
+﻿@model IEnumerable<Book>
+
+@{
+    ViewData["Title"] = "BookIndex";
+}
+
+<h1>BookIndex</h1>
+
+<div class="input-group mb-3">
+    <input type="text" id="searchInput" class="form-control" placeholder="Search...">
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div>
+            <a asp-action="BookCreate" class="btn btn-outline-primary"><i class="fa fa-plus"></i>Create New</a>
+
+            <button id="idSearch" class="btn btn-primary" type="button">Search By Id</button>
+            <button id="titleSearch" class="btn btn-primary" type="button">Search By Title</button>
+        </div>
+    </div>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Author)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Year)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Genre)
+            </th>
+            <th>
+                Loanable
+            </th>
+            <th> </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                <td>@Html.DisplayFor(modelItem => item.Author)</td>
+                <td>@Html.DisplayFor(modelItem => item.Year)</td>
+                <td>@Html.DisplayFor(modelItem => item.Genre)</td>
+                <td>@Html.DisplayFor(modelItem => item.IsLoanAble)</td>
+                <td>
+                    <a asp-action="Details" class="btn btn-success" asp-route-id="@item.Id">
+                        Details <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <a asp-action="UpdateBook" class="btn btn-warning" asp-route-id="@item.Id">
+                        Edit <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <a asp-action="DeleteBook" class="btn btn-danger" asp-route-id="@item.Id">
+                        Delete <i class="fa-solid fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            //When clicking the button with this id
+            $("#idSearch").click(function () {
+                //Get input from search field
+                var searchQuery = $("#searchInput").val();
+
+                //Go trough the table and get the id's for the books
+                var bookIds = $(".table tbody tr td:first-child").map(function () {
+                    return $(this).text();
+                }).get();
+
+                if (bookIds.includes(searchQuery)) {
+                    //Create the url with the detail view for the id
+                    var detailUrl = '@Url.Action("Details", "Book")';
+                    window.location.href = detailUrl + '?id=' + searchQuery;
+                } else {
+                    alert("No book with Id : " + searchQuery);
+                }
+            });
+            //When clicking the button with this id
+            $("#titleSearch").click(function () {
+                //Get input from search field
+                var searchQuery = $("#searchInput").val();
+
+                //Go trough the table and get the id's + title for the books
+                var titleAndId = $(".table tbody tr").map(function () {
+                    var title = $(this).find("td:nth-child(2)").text();
+                    var id  = $(this).find("td:first-child").text();
+
+                    return { title: title, id: id };
+                }).get();
+
+                //Get the Id from the title inputed
+                var matchingItem = titleAndId.find(function (item) {
+                    return item.title === searchQuery;
+                });
+
+                if (matchingItem) {
+                    //Create the url with the detail view for the id
+                    var detailUrl = '@Url.Action("Details", "Book")';
+                    window.location.href = detailUrl + '?id=' + matchingItem.id;
+                } else {
+                    alert("No book with title : " + searchQuery);
+                }
+            });
+        });
+    </script>
+}
